@@ -98,8 +98,9 @@ if __name__ == "__main__":
     plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei']
     plt.rcParams['axes.unicode_minus'] = False
 
+    # 爬取資料
     url = "https://roadsafety.tw/SchoolHotSpots"
-    browser = webdriver.Chrome(service=Service("chromedriver.exe"))
+    browser = webdriver.Chrome(service=Service("../chromedriver/chromedriver.exe"))
     browser.get(url)
     data = {'東海大學':{}, '逢甲大學':{}, '僑光科技大學':{}}
     browser.execute_script("setInterval(() => [...document.querySelectorAll('.modal.show .close')].forEach(e => e.click()), 300)")
@@ -122,17 +123,18 @@ if __name__ == "__main__":
         for schoolName in data:
             pd.DataFrame(data[schoolName]['年齡']).T.to_excel(writer, schoolName)
 
-    plt.figure(1)
+    # 繪製圖表
     barData, labels = dataToCountTotal(data, ['死亡', '受傷'])
+    plt.figure(1, figsize=(int(len(labels)*len(barData)), 5))
     barPlot(barData, labels, total_width=.8, single_width=.9)
-    plt.show()
-
-    plt.figure(2)
+    plt.savefig('foo1.png',dpi=300)
+    
     causeData, labels = dataToCauseData(data)
+    plt.figure(2, figsize=(int(len(labels)*len(causeData)), 5))
     barPlot(causeData, labels, total_width=.8, single_width=.9)
-    plt.show()
+    plt.savefig('foo2.png',dpi=300)
 
-    plt.figure(3)
     ageData, labels = dataToAgeData(data)
+    plt.figure(3, figsize=(int(len(labels)*len(ageData)), 5))
     barPlot(ageData, labels, total_width=.8, single_width=.9)
-    plt.show()
+    plt.savefig('foo3.png',dpi=300)
