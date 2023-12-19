@@ -7,7 +7,8 @@ from selenium.webdriver.support.ui import Select
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import threading
+import time
+
 
 def barPlot(data, tick, colors=None, total_width=0.8, single_width=1):
     if colors is None:
@@ -30,9 +31,7 @@ def dataToCountTotal(data, column):
     for i in range(len(column)):
         attribute = column[i]
         barData[attribute] = [sum([int(data[schoolName]['肇因'][index][attribute]) for index in data[schoolName]['肇因']]) for schoolName in data]
-    
-    barPlot(barData, labels, total_width=.8, single_width=.9)
-    plt.show()
+    return barData, labels
 
 
 def dataToCauseData(data):
@@ -54,9 +53,7 @@ def dataToCauseData(data):
                 causeData[schoolName].append(0)
             else:
                 causeData[schoolName].append(int(data[schoolName]['肇因'][indexes[0]]['件數']))
-    
-    barPlot(causeData, labels, total_width=.8, single_width=.9)
-    plt.show()
+    return causeData, labels
 
 
 def dataToAgeData(data):
@@ -97,6 +94,10 @@ def getTableData(tableID, browser):
 
 
 if __name__ == "__main__":
+    # 設定中文字體
+    plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei']
+    plt.rcParams['axes.unicode_minus'] = False
+
     url = "https://roadsafety.tw/SchoolHotSpots"
     browser = webdriver.Chrome(service=Service("chromedriver.exe"))
     browser.get(url)
@@ -106,6 +107,7 @@ if __name__ == "__main__":
     Select(browser.find_element(By.ID, "ddlSchoolType")).select_by_value("10708") # 選擇大專院校
     Select(browser.find_element(By.ID, "ddlCity")).select_by_value("15") # 選擇台中市
     for schoolName in data:
+        time.sleep(0.5)
         Select(browser.find_element(By.ID, "ddlSchool")).select_by_visible_text(schoolName) # 選擇學校
         browser.find_element(By.ID, "bSearch").click()
         data[schoolName]['肇因'] = getTableData("tbCause", browser)
@@ -120,10 +122,14 @@ if __name__ == "__main__":
             pd.DataFrame(data[schoolName]['年齡']).T.to_excel(writer, schoolName)
 
     plt.figure(1)
-    threading.Thread(target=dataToCountTotal, args=(data, ['死亡', '受傷'])).start()
+    barData, labels = dataToCountTotal(data, ['死亡', '受傷'])
+    barPlot(barData, labels, total_width=.8, single_width=.9)
+    plt.show()
 
     plt.figure(2)
-    threading.Thread(target=dataToCauseData, args=(data, )).start()
+    causeData, labels = dataToCauseData(data)
+    barPlot(causeData, labels, total_width=.8, single_width=.9)
+    plt.show()
 
     plt.figure(3)
     ageData, labels = dataToAgeData(data)
