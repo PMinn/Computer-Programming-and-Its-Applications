@@ -7,8 +7,7 @@ from selenium.webdriver.support.ui import Select
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import time
-
+import threading
 
 def barPlot(data, tick, colors=None, total_width=0.8, single_width=1):
     if colors is None:
@@ -25,13 +24,14 @@ def barPlot(data, tick, colors=None, total_width=0.8, single_width=1):
     plt.legend(loc='best')
 
 
-def drawBarChart(data, column):
-    label = [schoolName for schoolName in data]
+def dataToCountTotal(data, column):
+    labels = [schoolName for schoolName in data]
     barData = {}
     for i in range(len(column)):
         attribute = column[i]
         barData[attribute] = [sum([int(data[schoolName]['肇因'][index][attribute]) for index in data[schoolName]['肇因']]) for schoolName in data]
-    barPlot(barData, label, total_width=.8, single_width=.9)
+    
+    barPlot(barData, labels, total_width=.8, single_width=.9)
     plt.show()
 
 
@@ -54,7 +54,32 @@ def dataToCauseData(data):
                 causeData[schoolName].append(0)
             else:
                 causeData[schoolName].append(int(data[schoolName]['肇因'][indexes[0]]['件數']))
-    return causeData, labels
+    
+    barPlot(causeData, labels, total_width=.8, single_width=.9)
+    plt.show()
+
+
+def dataToAgeData(data):
+    unknown = 0
+    labels = ['18歲以下', '18歲-24歲', '25歲-44歲', '45歲-65歲', '65歲以上', '不明']
+    ageRange = [[0, 17], [18, 24], [25, 44], [45, 65], [66, 100]]
+    sumAgeData = {}
+    for schoolName in data:
+        sumAgeData[schoolName] = [0 for i in range(len(ageRange))]
+        for index in data[schoolName]['年齡']:
+            rangeOfAge = data[schoolName]['年齡'][index]['年齡層'].replace('歲', '').replace('以上', '').split('-')
+            if len(rangeOfAge) == 2:
+                for i in range(len(ageRange)):
+                    if int(rangeOfAge[1]) >= ageRange[i][0] and int(rangeOfAge[1]) <= ageRange[i][1]:
+                        sumAgeData[schoolName][i] += int(data[schoolName]['年齡'][index]['人數'])
+            elif rangeOfAge[0] == '不明':
+                unknown += int(data[schoolName]['年齡'][index]['人數'])
+            else:
+                for i in range(len(ageRange)):
+                    if int(rangeOfAge[0]) >= ageRange[i][0] and int(rangeOfAge[0]) <= ageRange[i][1]:
+                        sumAgeData[schoolName][i] += int(data[schoolName]['年齡'][index]['人數'])
+        sumAgeData[schoolName].append(unknown)
+    return sumAgeData, labels
 
 
 def getTableData(tableID, browser):
@@ -94,9 +119,13 @@ if __name__ == "__main__":
         for schoolName in data:
             pd.DataFrame(data[schoolName]['年齡']).T.to_excel(writer, schoolName)
 
-    causeData, labels = dataToCauseData(data)
-    barPlot(causeData, labels)
-    plt.show()
+    plt.figure(1)
+    threading.Thread(target=dataToCountTotal, args=(data, ['死亡', '受傷'])).start()
 
-    # print(data)
-    drawBarChart(data, ['死亡', '受傷'])
+    plt.figure(2)
+    threading.Thread(target=dataToCauseData, args=(data, )).start()
+
+    plt.figure(3)
+    ageData, labels = dataToAgeData(data)
+    barPlot(ageData, labels, total_width=.8, single_width=.9)
+    plt.show()
