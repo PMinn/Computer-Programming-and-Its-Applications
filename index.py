@@ -110,6 +110,7 @@ if __name__ == "__main__":
         time.sleep(0.5)
         Select(browser.find_element(By.ID, "ddlSchool")).select_by_visible_text(schoolName) # 選擇學校
         browser.find_element(By.ID, "bSearch").click()
+        time.sleep(0.5)
         data[schoolName]['肇因'] = getTableData("tbCause", browser)
         data[schoolName]['年齡'] = getTableData("tbAges", browser)
 
