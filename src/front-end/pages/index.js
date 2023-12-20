@@ -5,7 +5,10 @@ import { SearchIcon } from "@/icons/SearchIcon";
 export default function Home() {
   const host = 'http://localhost:8088'
   const [data, setData] = useState([]);
+  const [images, setImages] = useState([]);
   const [filterValue, setFilterValue] = useState("");
+  const [selectedKeys, setSelectedKeys] = useState(new Set([]));
+  const [isLoaded, setIsLoaded] = useState(false);
   const hasSearchFilter = Boolean(filterValue);
 
   useEffect(() => {
@@ -13,6 +16,24 @@ export default function Home() {
       .then(res => res.json())
       .then(setData)
   }, [])
+
+  function executeAnalysis() {
+    setIsLoaded(true)
+    fetch(`${host}/api/analysis`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify([...selectedKeys].map(value => data.find(d => d.school.value == value)))
+    })
+      .then(res => res.json())
+      .then(res => {
+        console.log(res)
+        let t = new Date().getTime();
+        setImages([`${host}/static/count.jpg?t=${t}`, `${host}/static/cause.jpg?t=${t}`, `${host}/static/age.jpg?t=${t}`])
+      })
+      .finally(() => setIsLoaded(false))
+  }
 
   const onSearchChange = useCallback((value) => {
     if (value) {
@@ -32,31 +53,29 @@ export default function Home() {
 
   return (
     <main className={`flex h-screen`}>
-      <Card className='w-[25%] h-screen' radius='none'>
-        <CardBody className="h-[80%]">
+      <Card className='w-[25%] min-w-[450px] h-screen' radius='none'>
+        <CardHeader>
+          <Input
+            isClearable
+            className="w-full"
+            placeholder="搜尋校名"
+            startContent={<SearchIcon />}
+            value={filterValue}
+            onClear={() => onClear()}
+            onValueChange={onSearchChange}
+          />
+        </CardHeader>
+        <CardBody className="h-[80%] p-0">
           <Table
+            removeWrapper
             hideHeader
-            bottomContentPlacement="outside"
             selectionMode="multiple"
-            topContent={(
-              <div className="flex flex-col gap-4">
-                <div className="flex justify-between gap-3 items-end">
-                  <Input
-                    isClearable
-                    className="w-full"
-                    placeholder="搜尋校名"
-                    startContent={<SearchIcon />}
-                    value={filterValue}
-                    onClear={() => onClear()}
-                    onValueChange={onSearchChange}
-                  />
-                </div>
-              </div>
-            )}
             classNames={{
               base: "max-h-[100%] overflow-scroll",
               table: "min-h-[100%]",
             }}
+            selectedKeys={selectedKeys}
+            onSelectionChange={setSelectedKeys}
           >
             <TableHeader>
               <TableColumn>學校</TableColumn>
@@ -75,24 +94,23 @@ export default function Home() {
         </CardBody>
         <CardFooter>
           <Button
-            // isLoading={isLoaded}
+            isLoading={isLoaded}
             color='primary'
             className="w-full"
-          // onClick={executeSimulation}
+            onClick={executeAnalysis}
           >分析</Button>
         </CardFooter>
       </Card>
 
       <div className='grow overflow-y-scroll h-screen relative'>
-        {/* <Progress color="success" value={progress} className='sticky top-0 left-0 z-10' /> */}
-        <div className="px-10 w-full">
-          <div className='flex justify-between flex-wrap items-start mt-3 z-0 px-5'>
-            <h2 className='w-[30%] font-bold text-xl m-2'></h2>
-            <h2 className='w-[30%] font-bold text-xl m-2'></h2>
-            <h2 className='w-[30%] font-bold text-xl m-2'></h2>
-
-          </div>
-
+        <div className="w-full py-5 h-full flex flex-col items-center">
+          {
+            images.map(image => (
+              <div className="w-[90%] flex justify-center items-center bg-white rounded-large mb-5">
+                <Image className="w-full h-[50vh] object-contain" src={image} />
+              </div>
+            ))
+          }
         </div>
       </div>
     </main>

@@ -1,140 +1,32 @@
-#coding=utf-8
+# coding=utf-8
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import Select
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import time
-
-
-def barPlot(data, tick, colors=None, total_width=0.8, single_width=1):
-    if colors is None:
-        colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
-    n_bars = len(data)
-    bar_width = total_width / n_bars
-    bars = []
-    for i, (name, values) in enumerate(data.items()):
-        x_offset = (i - n_bars / 2) * bar_width + bar_width / 2
-        bar = plt.bar(np.arange(len(values)) + x_offset, values, width=bar_width * single_width, tick_label=tick, label=name, color=colors[i % len(colors)])
-        bars.append(bar)
-    for bar in bars:
-        plt.bar_label(bar, fmt='%.0f', label_type='edge')
-    plt.legend(loc='best')
-
-
-def dataToCountTotal(data, column):
-    labels = [schoolName for schoolName in data]
-    barData = {}
-    for i in range(len(column)):
-        attribute = column[i]
-        barData[attribute] = [sum([int(data[schoolName]['肇因'][index][attribute]) for index in data[schoolName]['肇因']]) for schoolName in data]
-    return barData, labels
-
-
-def dataToCauseData(data):
-    sumCause = {}
-    for schoolName in data:
-        for index in data[schoolName]['肇因']:
-            if data[schoolName]['肇因'][index]['肇事原因'] not in sumCause:
-                sumCause[data[schoolName]['肇因'][index]['肇事原因']] = int(data[schoolName]['肇因'][index]['件數'])
-            else:
-                sumCause[data[schoolName]['肇因'][index]['肇事原因']] += int(data[schoolName]['肇因'][index]['件數'])
-    topFiveCause = sorted(sumCause.items(), key=lambda x: x[1], reverse=True)[:5]
-    labels = [cause[0] for cause in topFiveCause]
-    causeData = {}
-    for schoolName in data:
-        causeData[schoolName] = []
-        for cause in topFiveCause:
-            indexes = [index for index in data[schoolName]['肇因'] if data[schoolName]['肇因'][index]['肇事原因']==cause[0]]
-            if len(indexes) == 0:
-                causeData[schoolName].append(0)
-            else:
-                causeData[schoolName].append(int(data[schoolName]['肇因'][indexes[0]]['件數']))
-    return causeData, labels
-
-
-def dataToAgeData(data):
-    unknown = 0
-    labels = ['18歲以下', '18歲-24歲', '25歲-44歲', '45歲-65歲', '65歲以上', '不明']
-    ageRange = [[0, 17], [18, 24], [25, 44], [45, 65], [66, 100]]
-    sumAgeData = {}
-    for schoolName in data:
-        sumAgeData[schoolName] = [0 for i in range(len(ageRange))]
-        for index in data[schoolName]['年齡']:
-            rangeOfAge = data[schoolName]['年齡'][index]['年齡層'].replace('歲', '').replace('以上', '').split('-')
-            if len(rangeOfAge) == 2:
-                for i in range(len(ageRange)):
-                    if int(rangeOfAge[1]) >= ageRange[i][0] and int(rangeOfAge[1]) <= ageRange[i][1]:
-                        sumAgeData[schoolName][i] += int(data[schoolName]['年齡'][index]['人數'])
-            elif rangeOfAge[0] == '不明':
-                unknown += int(data[schoolName]['年齡'][index]['人數'])
-            else:
-                for i in range(len(ageRange)):
-                    if int(rangeOfAge[0]) >= ageRange[i][0] and int(rangeOfAge[0]) <= ageRange[i][1]:
-                        sumAgeData[schoolName][i] += int(data[schoolName]['年齡'][index]['人數'])
-        sumAgeData[schoolName].append(unknown)
-    return sumAgeData, labels
-
-
-def getTableData(tableID, browser):
-    table = browser.find_element(By.ID, tableID)
-    data = {}
-    keys = [td.get_attribute("innerText") for td in table.find_element(By.TAG_NAME, "thead").find_elements(By.TAG_NAME, "th")]
-    keys.pop(0)
-    for tr in table.find_element(By.TAG_NAME, "tbody").find_elements(By.TAG_NAME, "tr"):
-        th = tr.find_element(By.TAG_NAME, "th")
-        tds = tr.find_elements(By.TAG_NAME, "td")
-        data[th.get_attribute("innerText")] = {}
-        for i in range(len(keys)):
-            data[th.get_attribute("innerText")][keys[i]] = tds[i].get_attribute("innerText")
-    return data
+import export
+import dataFormatter
+from chart import barPlot
+from scraper import run
 
 
 if __name__ == "__main__":
-    # 設定中文字體
-    plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei']
-    plt.rcParams['axes.unicode_minus'] = False
-
     # 爬取資料
-    url = "https://roadsafety.tw/SchoolHotSpots"
+    selectedSchool = [{"city":{"text":"臺中市","value":"15"},"school":{"text":"逢甲大學","value":"21168:POINT (13430574.1967 2775198.2921000011)"}},{"city":{"text":"臺中市","value":"15"},"school":{"text":"東海大學","value":"21169:POINT (13425014.6006 2775277.2644000016)"}},{"city":{"text":"臺中市","value":"15"},"school":{"text":"僑光科技大學","value":"21164:POINT (13429953.322299998 2776456.0414000005)"}}]
+    for i in range(len(selectedSchool)):
+        selectedSchool[i]['label'] = selectedSchool[i]['school']['text'] + '(' + selectedSchool[i]['city']['text'] + ')'
     browser = webdriver.Chrome(service=Service("../chromedriver/chromedriver.exe"))
-    browser.get(url)
-    data = {'東海大學':{}, '逢甲大學':{}, '僑光科技大學':{}}
+    browser.get("https://roadsafety.tw/SchoolHotSpots")
     browser.execute_script("setInterval(() => [...document.querySelectorAll('.modal.show .close')].forEach(e => e.click()), 300)")
-    body = browser.find_element(By.TAG_NAME, "body")
-    Select(browser.find_element(By.ID, "ddlSchoolType")).select_by_value("10708") # 選擇大專院校
-    Select(browser.find_element(By.ID, "ddlCity")).select_by_value("15") # 選擇台中市
-    for schoolName in data:
-        time.sleep(0.5)
-        Select(browser.find_element(By.ID, "ddlSchool")).select_by_visible_text(schoolName) # 選擇學校
-        browser.find_element(By.ID, "bSearch").click()
-        time.sleep(0.5)
-        data[schoolName]['肇因'] = getTableData("tbCause", browser)
-        data[schoolName]['年齡'] = getTableData("tbAges", browser)
+    data = run(browser, selectedSchool)
 
     # 儲存成Excel
-    with pd.ExcelWriter('肇因.xlsx') as writer:
-        for schoolName in data:
-            pd.DataFrame(data[schoolName]['肇因']).T.to_excel(writer, schoolName)
-    with pd.ExcelWriter('年齡.xlsx') as writer:
-        for schoolName in data:
-            pd.DataFrame(data[schoolName]['年齡']).T.to_excel(writer, schoolName)
+    export.toExcel(data, '肇因')
+    export.toExcel(data, '年齡')
 
     # 繪製圖表
-    barData, labels = dataToCountTotal(data, ['死亡', '受傷'])
-    plt.figure(1, figsize=(int(len(labels)*len(barData)), 5))
-    barPlot(barData, labels, total_width=.8, single_width=.9)
-    plt.savefig('foo1.png',dpi=300)
+    barData, labels = dataFormatter.toCountTotal(data, ['死亡', '受傷'])
+    barPlot('count.jpg', barData, labels, figsize=(int(len(labels)*len(barData)), 5), total_width=.8, single_width=.9)
     
-    causeData, labels = dataToCauseData(data)
-    plt.figure(2, figsize=(int(len(labels)*len(causeData)), 5))
-    barPlot(causeData, labels, total_width=.8, single_width=.9)
-    plt.savefig('foo2.png',dpi=300)
+    causeData, labels = dataFormatter.toCauseData(data)
+    barPlot('cause.jpg',causeData, labels, figsize=(int(len(labels)*len(causeData)), 5), total_width=.8, single_width=.9)
 
-    ageData, labels = dataToAgeData(data)
-    plt.figure(3, figsize=(int(len(labels)*len(ageData)), 5))
-    barPlot(ageData, labels, total_width=.8, single_width=.9)
-    plt.savefig('foo3.png',dpi=300)
+    ageData, labels = dataFormatter.toAgeData(data)
+    barPlot('age.jpg', ageData, labels, figsize=(int(len(labels)*len(ageData)), 5), total_width=.8, single_width=.9)
