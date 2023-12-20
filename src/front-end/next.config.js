@@ -1,7 +1,17 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  reactStrictMode: true,
-  output: 'export',
-}
+const { PHASE_DEVELOPMENT_SERVER } = require('next/constants')
 
-module.exports = nextConfig
+module.exports = async (phase, { defaultConfig }) => {
+  /**
+   * @type {import('next').NextConfig}
+   */
+
+  if (phase === PHASE_DEVELOPMENT_SERVER) return {}
+
+  const nextConfig = {
+    reactStrictMode: true,
+    output: 'export',
+    distDir: '../html',
+  }
+
+  return nextConfig
+}

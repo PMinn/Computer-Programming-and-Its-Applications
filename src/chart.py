@@ -1,18 +1,26 @@
 # coding=utf-8
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
-def barPlot(output, data, tick, figsize=None, colors=None, total_width=0.8, single_width=1):
+def barPlot(output, data, tick, title="", figsize=None, colors=None, total_width=0.8, single_width=1):
     # 設定中文字體
     plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei']
     plt.rcParams['axes.unicode_minus'] = False
+
+    # 設定為SVG格式
+    matplotlib.use('agg')
     
     if colors is None:
         colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+
     if figsize is None:
         plt.figure()
     else:
         plt.figure(figsize=figsize)
+
+    plt.title(title) 
+
     n_bars = len(data)
     bar_width = total_width / n_bars
     bars = []

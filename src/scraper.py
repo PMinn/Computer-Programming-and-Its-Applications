@@ -55,10 +55,10 @@ if __name__ == "__main__":
 
     # 繪製圖表
     barData, labels = dataFormatter.toCountTotal(data, ['死亡', '受傷'])
-    barPlot('./static/count.jpg', barData, labels, figsize=(int(len(labels)*len(barData)), 5), total_width=.8, single_width=.9)
+    barPlot('./static/count.jpg', barData, labels, figsize=(len(labels)*max(len(barData), 3), 5), total_width=.8, single_width=.9)
     
     causeData, labels = dataFormatter.toCauseData(data)
-    barPlot('./static/cause.jpg',causeData, labels, figsize=(int(len(labels)*len(causeData)), 5), total_width=.8, single_width=.9)
+    barPlot('./static/cause.jpg',causeData, labels, figsize=(max(len(labels), 3)*len(causeData), 5), total_width=.8, single_width=.9)
 
     ageData, labels = dataFormatter.toAgeData(data)
-    barPlot('./static/age.jpg', ageData, labels, figsize=(int(len(labels)*len(ageData)), 5), total_width=.8, single_width=.9)
+    barPlot('./static/age.jpg', ageData, labels, figsize=(len(labels)*max(len(ageData), 3), 5), total_width=.8, single_width=.9)

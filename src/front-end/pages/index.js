@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { SearchIcon } from "@/icons/SearchIcon";
 
 export default function Home() {
-  const host = 'http://localhost:8088'
+  const host = ''
   const [data, setData] = useState([]);
   const [images, setImages] = useState([]);
   const [filterValue, setFilterValue] = useState("");
@@ -106,8 +106,8 @@ export default function Home() {
         <div className="w-full py-5 h-full flex flex-col items-center">
           {
             images.map(image => (
-              <div className="w-[90%] flex justify-center items-center bg-white rounded-large mb-5">
-                <Image className="w-full h-[50vh] object-contain" src={image} />
+              <div className="w-[90%] h-[50vh] flex justify-center items-center bg-white rounded-large mb-5">
+                <Image className="w-full  h-full object-contain" src={image} disableSkeleton={true} />
               </div>
             ))
           }

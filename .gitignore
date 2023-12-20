@@ -1,6 +1,7 @@
 *.xlsx
+*.jpg
 *.png
 *.exe
 LICENSE.*
 LICENSE
-*.pyc
+__pycache__
