@@ -18,10 +18,31 @@
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
+  background: linear-gradient(to bottom,
       transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+      rgb(var(--background-end-rgb))) rgb(var(--background-start-rgb));
+}
+
+
+*::-webkit-scrollbar {
+  width: 5px;
+  height: 100%;
+}
+
+*::-webkit-scrollbar-button {
+  background: transparent;
+  border-radius: 4px;
+}
+
+*::-webkit-scrollbar-track-piece {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background-color: #919191;
+}
+
+*::-webkit-scrollbar-track {
+  box-shadow: transparent;
 }

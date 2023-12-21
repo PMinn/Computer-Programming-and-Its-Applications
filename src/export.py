@@ -2,7 +2,9 @@
 import pandas as pd
 
 
-def toExcel(data, className):
-    with pd.ExcelWriter(f'{className}.xlsx') as writer:
+def toExcel(data, path='.', className='file'):
+    if path.endswith('/'):
+        path = path[:-1]
+    with pd.ExcelWriter(f'{path}/{className}.xlsx') as writer:
             for schoolName in data:
                 pd.DataFrame(data[schoolName][className]).T.to_excel(writer, schoolName)

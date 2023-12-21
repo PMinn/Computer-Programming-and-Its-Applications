@@ -1,11 +1,13 @@
-import { Skeleton, Card, CardHeader, CardBody, CardFooter, Image, Button, Input, Progress, Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from "@nextui-org/react";
+import { Link, Card, CardHeader, CardBody, CardFooter, Image, Button, Input, Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from "@nextui-org/react";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { SearchIcon } from "@/icons/SearchIcon";
+import { ExcelIcon } from "@/icons/ExcelIcon";
 
 export default function Home() {
-  const host = ''
+  const host = '';
   const [data, setData] = useState([]);
-  const [images, setImages] = useState([]);
+  const [images, setImages] = useState(null);
+  const [excels, setExcels] = useState(null);
   const [filterValue, setFilterValue] = useState("");
   const [selectedKeys, setSelectedKeys] = useState(new Set([]));
   const [isLoaded, setIsLoaded] = useState(false);
@@ -31,6 +33,10 @@ export default function Home() {
         console.log(res)
         let t = new Date().getTime();
         setImages([`${host}/static/count.jpg?t=${t}`, `${host}/static/cause.jpg?t=${t}`, `${host}/static/age.jpg?t=${t}`])
+        setExcels(['肇因', '年齡'].map(name => ({
+          name,
+          url: `${host}/static/${name}.xlsx?t=${t}`
+        })))
       })
       .finally(() => setIsLoaded(false))
   }
@@ -105,7 +111,19 @@ export default function Home() {
       <div className='grow overflow-y-scroll h-screen relative'>
         <div className="w-full py-5 h-full flex flex-col items-center">
           {
-            images.map(image => (
+            excels && (
+              <div className="w-[90%] p-5 flex items-center bg-white rounded-large mb-5">
+                <div className="mx-2">下載原始資料</div>
+                {
+                  excels.map(excel => (
+                    <Button className="mx-2" color="success" variant="flat" startContent={<ExcelIcon />} href={excel.url} target="_blank" as={Link}>{excel.name}</Button>
+                  ))
+                }
+              </div>
+            )
+          }
+          {
+            images && images.map(image => (
               <div className="w-[90%] h-[50vh] flex justify-center items-center bg-white rounded-large mb-5">
                 <Image className="w-full  h-full object-contain" src={image} disableSkeleton={true} />
               </div>

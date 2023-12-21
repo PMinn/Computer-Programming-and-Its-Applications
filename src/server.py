@@ -39,8 +39,8 @@ def analysis():
     data = run(browser, selectedSchool)
 
     # 儲存成Excel
-    export.toExcel(data, '肇因')
-    export.toExcel(data, '年齡')
+    export.toExcel(data, './static', '肇因')
+    export.toExcel(data, './static', '年齡')
 
     # 繪製圖表
     barData, labels = dataFormatter.toCountTotal(data, ['死亡', '受傷'])
