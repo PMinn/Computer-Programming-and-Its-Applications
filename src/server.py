@@ -19,9 +19,6 @@ port = 8088
 def root():
     return send('html/', 'index.html')
 
-@app.route('/404')
-def err():
-    return send('html/','404.html')
 
 @app.route('/_next/<path:subpath>')
 def next(subpath):
@@ -35,7 +32,7 @@ def analysis():
         selectedSchool[i]['label'] = selectedSchool[i]['school']['text'] + '(' + selectedSchool[i]['city']['text'] + ')'
     browser = webdriver.Chrome(service=Service("../chromedriver/chromedriver.exe"))
     browser.get("https://roadsafety.tw/SchoolHotSpots")
-    browser.execute_script("setInterval(() => {[...document.querySelectorAll('.modal.show .close')].forEach(e => e.click());document.querySelector('#Result .card-body').scrollTop+=10;}, 300)")
+    browser.execute_script("setInterval(() => {[...document.querySelectorAll('.modal.show .close')].forEach(e => e.click());document.querySelector('#Result .card-body').scrollTop+=50;}, 300)")
     data = run(browser, selectedSchool)
 
     # 儲存成Excel

@@ -46,7 +46,7 @@ if __name__ == "__main__":
         selectedSchool[i]['label'] = selectedSchool[i]['school']['text'] + '(' + selectedSchool[i]['city']['text'] + ')'
     browser = webdriver.Chrome(service=Service("../chromedriver/chromedriver.exe"))
     browser.get("https://roadsafety.tw/SchoolHotSpots")
-    browser.execute_script("setInterval(() => [...document.querySelectorAll('.modal.show .close')].forEach(e => e.click()), 300)")
+    browser.execute_script("setInterval(() => {[...document.querySelectorAll('.modal.show .close')].forEach(e => e.click());document.querySelector('#Result .card-body').scrollTop+=50;}, 300)")
     data = run(browser, selectedSchool)
 
     # 儲存成Excel
