@@ -11,9 +11,14 @@ openpyxl
 ```
 
 ## chromedriver
-[googlechromelabs](https://googlechromelabs.github.io/chrome-for-testing/#stable)
+下載[chromedriver](https://googlechromelabs.github.io/chrome-for-testing/#stable)並將檔案放入以下路徑
+
+```
+/chromedriver/chromedriver.exe
+/chromedriver/LICENSE.chromedriver
+```
 
 ## 執行
 ```
-server.py
+python server.py
 ```
