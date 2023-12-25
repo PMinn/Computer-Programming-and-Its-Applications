@@ -116,7 +116,7 @@ export default function Home() {
                 <div className="mx-2">下載原始資料</div>
                 {
                   excels.map(excel => (
-                    <Button className="mx-2" color="success" variant="flat" startContent={<ExcelIcon />} href={excel.url} target="_blank" as={Link}>{excel.name}</Button>
+                    <Button className="mx-2 bg-gradient-to-tr from-[#185C37] to-[#33C481] text-white shadow-lg" variant="solid" startContent={<ExcelIcon />} href={excel.url} target="_blank" as={Link} radius="full">{excel.name}</Button>
                   ))
                 }
               </div>

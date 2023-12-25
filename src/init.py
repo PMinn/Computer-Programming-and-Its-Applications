@@ -21,7 +21,7 @@ def getTableData(tableID, browser):
     return data
 
 
-if __name__ == "__main__":
+def getUniversityList():
     # 爬取資料
     url = "https://roadsafety.tw/SchoolHotSpots"
     browser = webdriver.Chrome(service=Service("../chromedriver/chromedriver.exe"))
@@ -45,3 +45,6 @@ if __name__ == "__main__":
                 universityList.append({'school':{'text':schoolOptionElement.get_attribute('innerText'), 'value': schoolValue}, 'city':{'value':cityValue, 'text':cityText}})
     with open('./static/universityList.json', 'w', encoding='utf-8') as file:
         json.dump(universityList, file, ensure_ascii=False)
+
+if __name__ == "__main__":
+    main()

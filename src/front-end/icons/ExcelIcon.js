@@ -3,10 +3,10 @@ export const ExcelIcon = (props) => (
         aria-hidden="true"
         fill="none"
         focusable="false"
-        height="1em"
         role="presentation"
         viewBox="0 0 256 256"
-        width="1em"
+        width="1.2em"
+        height="1.2em"
         {...props}
     >
         <path
