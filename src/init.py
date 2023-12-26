@@ -27,7 +27,6 @@ def getUniversityList():
     browser = webdriver.Chrome(service=Service("../chromedriver/chromedriver.exe"))
     browser.get(url)
     browser.execute_script("setInterval(() => [...document.querySelectorAll('.modal.show .close')].forEach(e => e.click()), 300)")
-    body = browser.find_element(By.TAG_NAME, "body")
     Select(browser.find_element(By.ID, "ddlSchoolType")).select_by_value("10708") # 選擇大專院校
     citySelectElement = browser.find_element(By.ID, "ddlCity")
     citySelect = Select(citySelectElement)

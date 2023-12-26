@@ -51,5 +51,5 @@ def analysis():
 
 
 if __name__ == "__main__":
-    init.getUniversityList()
+    # init.getUniversityList()
     app.run(port=port, debug=False)
