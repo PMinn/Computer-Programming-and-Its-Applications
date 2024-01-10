@@ -20,5 +20,10 @@ openpyxl
 
 ## 執行
 ```
+cd src
 python server.py
 ```
+
+## 結果
+![模擬器1](https://github.com/PMinn/Computer-Programming-and-Its-Applications/blob/main/images/demo1.jpg?raw=true)
+![模擬器2](https://github.com/PMinn/Computer-Programming-and-Its-Applications/blob/main/images/demo2.jpg?raw=true)
